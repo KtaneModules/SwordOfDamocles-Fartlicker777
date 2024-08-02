@@ -33,6 +33,10 @@ public class SwordOfDamocles : MonoBehaviour {
    int ModsForFortyPercent;
    int SolvesSinceStrike;
 
+   bool BossModulePresent;
+   public static string[] ignoredModules = null;
+   int StoredSolves;
+
    Coroutine Idle;
 
    int Solved;
@@ -47,10 +51,70 @@ public class SwordOfDamocles : MonoBehaviour {
 
       Button.OnInteract += delegate () { Press(); return false; };
 
-   }
+      if (ignoredModules == null) {
+         ignoredModules = GetComponent<KMBossModule>().GetIgnoredModules("Sword of Damocles", new string[] {
+                "14",
+                "42",
+                "501",
+                "A>N<D",
+                "Bamboozling Time Keeper",
+                "Black Arrows",
+                "Brainf---",
+                "The Board Walk",
+                "Busy Beaver",
+                "Don't Touch Anything",
+                "Floor Lights",
+                "Forget Any Color",
+                "Forget Enigma",
+                "Forget Ligma",
+                "Forget Everything",
+                "Forget Infinity",
+                "Forget It Not",
+                "Forget Maze Not",
+                "Forget Me Later",
+                "Forget Me Not",
+                "Forget Perspective",
+                "Forget The Colors",
+                "Forget Them All",
+                "Forget This",
+                "Forget Us Not",
+                "Iconic",
+                "Keypad Directionality",
+                "Kugelblitz",
+                "Multitask",
+                "OmegaDestroyer",
+                "OmegaForest",
+                "Organization",
+                "Password Destroyer",
+                "Purgatory",
+                "Reporting Anomalies",
+                "RPS Judging",
+                "Security Council",
+                "Shoddy Chess",
+                "Simon Forgets",
+                "Simon's Stages",
+                "Souvenir",
+                "Speech Jammer",
+                "Tallordered Keys",
+                "The Time Keeper",
+                "Timing is Everything",
+                "The Troll",
+                "Turn The Key",
+                "The Twin",
+                "Übermodule",
+                "Ultimate Custom Night",
+                "The Very Annoying Button",
+                "WAR",
+                "Whiteout"
+            });
+         }
+      }
 
    private void Start () {
       Idle = StartCoroutine(Sway());
+      if (Bomb.GetSolvableModuleNames().Count(x => ignoredModules.Contains(x)) > 0) {
+         BossModulePresent = true;
+      }
    }
 
    IEnumerator Sway () {
@@ -93,13 +157,18 @@ public class SwordOfDamocles : MonoBehaviour {
    }
 
    void Press () {
-      if (ModuleSolved) {
+      if (ModuleSolved && !BossModulePresent) {
          return;
       }
       Activated = true;
       GetComponent<KMBombModule>().HandlePass();
       ModuleSolved = true;
       StartCoroutine(PushIn());
+      if (BossModulePresent && StoredSolves > 0) {
+         SolveRandomMod();
+         StoredSolves--;
+      }
+      
    }
 
    IEnumerator PushIn () {
@@ -107,6 +176,11 @@ public class SwordOfDamocles : MonoBehaviour {
       Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
       for (int i = 0; i < 5; i++) {
          Button.transform.localPosition += new Vector3(0, -0.001F, 0);
+         yield return new WaitForSeconds(0.005F);
+      }
+      yield return new WaitForSeconds(0.005F);
+      for (int i = 0; i < 5; i++) {
+         Button.transform.localPosition += new Vector3(0, 0.001F, 0);
          yield return new WaitForSeconds(0.005F);
       }
    }
@@ -246,7 +320,12 @@ public class SwordOfDamocles : MonoBehaviour {
 
       if (Solved < Bomb.GetSolvedModuleNames().Count()) {
          Solved++;
-         SolveRandomMod();
+         if (!BossModulePresent) {
+            SolveRandomMod();
+         }
+         else {
+            StoredSolves++;
+         }
       }
       
    }

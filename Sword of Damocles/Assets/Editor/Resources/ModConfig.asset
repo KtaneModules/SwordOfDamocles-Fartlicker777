@@ -20,4 +20,4 @@ MonoBehaviour:
     any bugs."
   version: 
   outputFolder: build
-  previewImage: {fileID: 2800000, guid: da85dbbdf8ecd4f419c69a080cf784cf, type: 3}
+  previewImage: {fileID: 2800000, guid: 2ad539287e028814aadb80cbbd763143, type: 3}
